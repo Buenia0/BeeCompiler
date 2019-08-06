@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include "beecompiler.h"
+#include "beecompiler_types.h"
 using namespace std;
 
 #ifndef __fastcall
@@ -23,10 +24,11 @@ namespace beecompiler
 
             BeeCompiler &comp;
         
-            void initc(vector<uint8_t> &mem);
+            void initc();
             inline void __fastcall executec(BlockMap temp);
     
             inline void __fastcall cmov(int reg, int imm);
+            inline void __fastcall cmovr(int reg1, int reg2);
             inline void __fastcall cstr(int reg, int regaddr, int regoffs);
             inline void __fastcall cldr(int reg, int regaddr, int regoffs);
             inline void __fastcall cadd(int reg1, int reg2, int imm);
@@ -35,9 +37,11 @@ namespace beecompiler
             inline void __fastcall cb(int addr);
     
             uint32_t registers[12];
-            vector<uint8_t> memarr;
-    
-            vector<uint8_t>& getmemory();
+            
+            inline uint32_t getreg(int num)
+            {
+                return registers[num];
+            }
     };
 };
 

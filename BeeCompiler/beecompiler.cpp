@@ -17,10 +17,6 @@ namespace beecompiler
     void BeeCompiler::init()
     {
         blockarray.resize(size, InstructionSet::Default);
-        destregmap.resize(size, -1);
-        sourceregmap.resize(size, -1);
-        regoffsmap.resize(size, -1);
-        immmap.resize(size, -1);
     }
     
     void BeeCompiler::erasefirstelement()
@@ -43,6 +39,8 @@ namespace beecompiler
             }
         }
         
+        optimize();
+        
         execute(blockarray);
     }
     
@@ -58,27 +56,23 @@ namespace beecompiler
             }
         }
         
-        optimize();
-        
         return compiled;
     }
     
     void BeeCompiler::optimize()
     {
-        for (int i = 0; i < (int)(compiled.size()); i++)
+        for (int i = 0; i < (int)(blockarray.size()); i++)
         {
-            if (compiled.at(i) == InstructionSet::Load && compiled.at(i + 1) == InstructionSet::Add && compiled.at(i + 2) == InstructionSet::Store)
+            if (isftranscapable(i))
             {
-                // cout << "True" << endl;
+                changetoftrans(i);
             }
-            
-            cout << compiled.at(i) << endl;
         }
     }
     
     void BeeCompiler::eraseelement(int pos)
     {
-        compiled.erase(compiled.begin() + pos);
+        blockarray.erase(blockarray.begin() + pos);
         destregmap.erase(destregmap.begin() + pos);
         sourceregmap.erase(sourceregmap.begin() + pos);
         regoffsmap.erase(regoffsmap.begin() + pos);
@@ -92,7 +86,15 @@ namespace beecompiler
         sourceregmap.push_back(-2);
         regoffsmap.push_back(-2);
         immmap.push_back(imm);
-        erasefirstelement();
+    }
+    
+    void BeeCompiler::MOVR(int reg1, int reg2)
+    {
+        compiled.push_back(InstructionSet::MoveReg);
+        destregmap.push_back(reg1);
+        sourceregmap.push_back(reg2);
+        regoffsmap.push_back(-2);
+        immmap.push_back(-2);
     }
     
     void BeeCompiler::STR(int reg, int regaddr, int regoffs)
@@ -102,7 +104,6 @@ namespace beecompiler
         sourceregmap.push_back(regaddr);
         regoffsmap.push_back(-2);
         immmap.push_back(regoffs);
-        erasefirstelement();
     }
     
     void BeeCompiler::LDR(int reg, int regaddr, int regoffs)
@@ -112,7 +113,6 @@ namespace beecompiler
         sourceregmap.push_back(regaddr);
         regoffsmap.push_back(-2);
         immmap.push_back(regoffs);
-        erasefirstelement();
     }
     
     void BeeCompiler::ADD(int reg1, int reg2, int imm)
@@ -122,7 +122,6 @@ namespace beecompiler
         sourceregmap.push_back(reg2);
         regoffsmap.push_back(-2);
         immmap.push_back(imm);
-        erasefirstelement();
     }
     
     void BeeCompiler::ADC(int reg1, int reg2, int imm)
@@ -132,7 +131,6 @@ namespace beecompiler
         sourceregmap.push_back(reg2);
         regoffsmap.push_back(-2);
         immmap.push_back(imm);
-        erasefirstelement();
     }
     
     void BeeCompiler::FTRANS(int reg, int addroffs, int regoffs)
@@ -142,7 +140,6 @@ namespace beecompiler
         sourceregmap.push_back(-1);
         regoffsmap.push_back(regoffs);
         immmap.push_back(addroffs);
-        erasefirstelement();
     }
     
     void BeeCompiler::B(int addr)
@@ -152,7 +149,6 @@ namespace beecompiler
         sourceregmap.push_back(-2);
         regoffsmap.push_back(-2);
         immmap.push_back(addr);
-        erasefirstelement();
         branched = true;
     }
 };

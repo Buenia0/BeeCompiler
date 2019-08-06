@@ -20,12 +20,15 @@ enum InstructionSet : int
     AddCarry = 4,
     FusedTransfer = 5,
     Branch = 6,
+    MoveReg = 7
 };
 
 typedef vector<InstructionSet> BlockMap;
 typedef vector<int> ValueMap;
 typedef function<void(BlockMap)> ExecFunc;
 typedef int (*JumpMap)(int reg1, int reg2, int regoffs, int addroffs);
+typedef function<uint8_t(uint32_t)> rbcallback;
+typedef function<void(uint32_t, uint8_t)> wbcallback;
 
 
 #endif // BEECOMPILER_TYPES
